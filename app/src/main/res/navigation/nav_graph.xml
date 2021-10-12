@@ -25,4 +25,9 @@
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/blankFragment"
+        android:name="com.example.findmyandroid.BlankFragment"
+        android:label="blank_fragment"
+        tools:layout="@layout/blank_fragment" />
 </navigation>
