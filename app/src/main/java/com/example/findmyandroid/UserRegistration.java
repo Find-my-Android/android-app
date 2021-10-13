@@ -29,6 +29,14 @@ public class UserRegistration extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        binding.buttonCreateAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NavHostFragment.findNavController(UserRegistration.this)
+                        .navigate(R.id.action_userRegstration_to_homeScreen);
+            }
+        });
+
         binding.buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
