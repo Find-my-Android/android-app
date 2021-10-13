@@ -6,31 +6,34 @@
     app:startDestination="@id/loginFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.findmyandroid.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
-
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.findmyandroid.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
-    </fragment>
-    <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.findmyandroid.ui.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
-    <action
-        android:id="@+id/action_SecondFragment_to_FirstFragment"
-        app:destination="@id/FirstFragment"/>
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment"/>
+            android:id="@+id/action_login_to_homeScreen"
+            app:destination="@id/homeScreen"/>
+        <action
+            android:id="@+id/action_login_to_userRegistration"
+            app:destination="@id/userRegistration"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/userRegistration"
+        android:name="com.example.findmyandroid.UserRegistration"
+        android:label="fragment_user_registration"
+        tools:layout="@layout/fragment_user_registration">
+        <action
+        android:id="@+id/action_userRegstration_to_login"
+        app:destination="@id/loginFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/homeScreen"
+        android:name="com.example.findmyandroid.HomeScreen"
+        android:label="fragment_home_screen"
+        tools:layout="@layout/fragment_home_screen" >
+        <action
+            android:id="@+id/action_homeScreen_to_login"
+            app:destination="@id/loginFragment"/>
     </fragment>
 </navigation>
