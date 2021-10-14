@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_login_to_userRegistration"
             app:destination="@id/userRegistration"/>
+        <action
+            android:id="@+id/action_login_to_forgotPassword"
+            app:destination="@id/forgotPassword"/>
     </fragment>
 
     <fragment
@@ -37,6 +40,15 @@
         tools:layout="@layout/fragment_home_screen" >
         <action
             android:id="@+id/action_homeScreen_to_login"
+            app:destination="@id/loginFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/forgotPassword"
+        android:name="com.example.findmyandroid.ForgotPassword"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" >
+        <action
+            android:id="@+id/action_forgotPassword_to_login"
             app:destination="@id/loginFragment"/>
     </fragment>
 </navigation>

@@ -54,6 +54,14 @@ public class LoginFragment extends Fragment {
         final Button loginButton = binding.login;
         final ProgressBar loadingProgressBar = binding.loading;
 
+        binding.textForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NavHostFragment.findNavController(LoginFragment.this)
+                        .navigate(R.id.action_login_to_forgotPassword);
+            }
+        });
+
         loginButton.setEnabled(false);
         binding.createAccount.setOnClickListener(new View.OnClickListener() {
             @Override
