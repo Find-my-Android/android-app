@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_login_to_forgotPassword"
             app:destination="@id/forgotPassword"/>
+        <action
+            android:id="@+id/action_loginFragment_self"
+            app:destination="@id/loginFragment" />
     </fragment>
 
     <fragment
@@ -50,5 +53,20 @@
         <action
             android:id="@+id/action_forgotPassword_to_login"
             app:destination="@id/loginFragment"/>
+        <action
+            android:id="@+id/action_forgotPassword_to_reset"
+            app:destination="@id/ResetPassword"/>
+    </fragment>
+    <fragment
+        android:id="@+id/ResetPassword"
+        android:name="com.example.findmyandroid.ResetPassword"
+        android:label="fragment_reset_password"
+        tools:layout="@layout/fragment_reset_password" >
+        <action
+            android:id="@+id/action_reset_password_to_login"
+            app:destination="@id/loginFragment"/>
+        <action
+            android:id="@+id/action_reset_password_to_forgot_password"
+            app:destination="@id/forgotPassword"/>
     </fragment>
 </navigation>

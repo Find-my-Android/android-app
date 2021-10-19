@@ -36,6 +36,20 @@ public class ForgotPassword extends Fragment {
                         .navigate(R.id.action_forgotPassword_to_login);
             }
         });
+        binding.buttonConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NavHostFragment.findNavController(ForgotPassword.this)
+                        .navigate(R.id.action_forgotPassword_to_login);
+            }
+        });
+        binding.buttonReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NavHostFragment.findNavController(ForgotPassword.this)
+                        .navigate(R.id.action_forgotPassword_to_login);
+            }
+        });
     }
 
     @Override
