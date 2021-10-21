@@ -18,7 +18,7 @@
             app:destination="@id/userRegistration"/>
         <action
             android:id="@+id/action_login_to_forgotPassword"
-            app:destination="@id/forgotPassword"/>
+            app:destination="@id/changePassword"/>
         <action
             android:id="@+id/action_loginFragment_self"
             app:destination="@id/loginFragment" />
@@ -46,15 +46,15 @@
             app:destination="@id/loginFragment"/>
     </fragment>
     <fragment
-        android:id="@+id/forgotPassword"
-        android:name="com.example.findmyandroid.ForgotPassword"
-        android:label="fragment_forgot_password"
-        tools:layout="@layout/fragment_forgot_password" >
+        android:id="@+id/changePassword"
+        android:name="com.example.findmyandroid.ChangePassword"
+        android:label="fragment_change_password"
+        tools:layout="@layout/fragment_change_password" >
         <action
-            android:id="@+id/action_forgotPassword_to_login"
+            android:id="@+id/action_changePassword_to_login"
             app:destination="@id/loginFragment"/>
         <action
-            android:id="@+id/action_forgotPassword_to_reset"
+            android:id="@+id/action_changePassword_to_reset"
             app:destination="@id/ResetPassword"/>
     </fragment>
     <fragment
@@ -66,7 +66,7 @@
             android:id="@+id/action_reset_password_to_login"
             app:destination="@id/loginFragment"/>
         <action
-            android:id="@+id/action_reset_password_to_forgot_password"
-            app:destination="@id/forgotPassword"/>
+            android:id="@+id/action_reset_password_to_change_password"
+            app:destination="@id/changePassword"/>
     </fragment>
 </navigation>

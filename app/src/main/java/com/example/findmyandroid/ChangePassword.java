@@ -9,11 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.findmyandroid.databinding.FragmentForgotPasswordBinding;
+import com.example.findmyandroid.databinding.FragmentChangePasswordBinding;
 
-public class ForgotPassword extends Fragment {
+public class ChangePassword extends Fragment {
 
-    private FragmentForgotPasswordBinding binding;
+    private FragmentChangePasswordBinding binding;
 
     @Override
     public View onCreateView(
@@ -21,7 +21,7 @@ public class ForgotPassword extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        binding = FragmentForgotPasswordBinding.inflate(inflater, container, false);
+        binding = FragmentChangePasswordBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -32,22 +32,22 @@ public class ForgotPassword extends Fragment {
         binding.buttonBackToLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(ForgotPassword.this)
-                        .navigate(R.id.action_forgotPassword_to_login);
+                NavHostFragment.findNavController(ChangePassword.this)
+                        .navigate(R.id.action_changePassword_to_reset);
             }
         });
         binding.buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(ForgotPassword.this)
-                        .navigate(R.id.action_forgotPassword_to_login);
+                NavHostFragment.findNavController(ChangePassword.this)
+                        .navigate(R.id.action_changePassword_to_login);
             }
         });
         binding.buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(ForgotPassword.this)
-                        .navigate(R.id.action_forgotPassword_to_login);
+                NavHostFragment.findNavController(ChangePassword.this)
+                        .navigate(R.id.action_changePassword_to_reset);
             }
         });
     }

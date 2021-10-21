@@ -42,7 +42,7 @@ public class ResetPassword extends Fragment {
             @Override
             public void onClick(View view) {
                 NavHostFragment.findNavController(ResetPassword.this)
-                        .navigate(R.id.action_reset_password_to_forgot_password);
+                        .navigate(R.id.action_reset_password_to_login);
             }
         });
     }
