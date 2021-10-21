@@ -55,6 +55,14 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        binding.changePassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NavHostFragment.findNavController(HomeScreen.this)
+                        .navigate(R.id.action_homeScreen_to_changePassword);
+            }
+        });
+
         binding.buttonLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
