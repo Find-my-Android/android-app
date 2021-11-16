@@ -32,7 +32,7 @@ public class LoginDataSource {
             http.setRequestProperty("Content-Type", "application/json");
             http.setRequestProperty("charset", "utf-8");
 
-            String data = "{\"email\": \"" + username + "\", \"password\": \"" + password + "\"}";
+            String data = "{\"email\": \"" + username + "\", \"password\": \"" + password + "\", \"source\": \"android\"}";
 
             byte[] out = data.getBytes(StandardCharsets.UTF_8);
 
