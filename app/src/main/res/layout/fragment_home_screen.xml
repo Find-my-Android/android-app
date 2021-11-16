@@ -58,20 +58,34 @@
         android:id="@+id/textViewTracking"
         android:layout_width="80dp"
         android:layout_height="39dp"
+        android:layout_marginStart="122dp"
+        android:layout_marginTop="29dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginBottom="10dp"
         android:text="Tracking"
         android:textSize="20dp"
-        tools:layout_editor_absoluteX="122dp"
-        tools:layout_editor_absoluteY="136dp" />
+        app:layout_constraintBottom_toTopOf="@+id/mapview"
+        app:layout_constraintEnd_toStartOf="@+id/seekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_first"
+        app:layout_constraintVertical_bias="0.0" />
 
     <SeekBar
         android:id="@+id/seekBar"
         style="@style/Widget.AppCompat.SeekBar.Discrete"
         android:layout_width="65dp"
         android:layout_height="25dp"
+        android:layout_marginStart="9dp"
+        android:layout_marginTop="29dp"
+        android:layout_marginEnd="135dp"
+        android:layout_marginBottom="16dp"
         android:max="1"
         android:progress="0"
-        tools:layout_editor_absoluteX="211dp"
-        tools:layout_editor_absoluteY="136dp" />
+        app:layout_constraintBottom_toTopOf="@+id/mapview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textViewTracking"
+        app:layout_constraintTop_toBottomOf="@+id/textview_first"
+        app:layout_constraintVertical_bias="0.35" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
