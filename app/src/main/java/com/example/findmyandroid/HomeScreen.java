@@ -41,8 +41,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
 
     MapView mapView;
     GoogleMap map;
-    MasterKey masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
-
+    MasterKey masterKeyAlias;
     public HomeScreen() throws GeneralSecurityException, IOException {
     }
 
@@ -88,6 +87,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
                 }
                 if (getContext() != null) {
                     try {
+                        masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
                         SharedPreferences sp = EncryptedSharedPreferences.create(
                                 getContext(),
                                 "secret_shared_prefs",
