@@ -86,26 +86,29 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
                 if (getContext() != null && getContext().getApplicationContext() != null) {
                     Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
                 }
-                try {
-                    SharedPreferences sp = EncryptedSharedPreferences.create(
-                            getContext(),
-                            "secret_shared_prefs",
-                            masterKeyAlias,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                    );
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.remove("username");
-                    editor.remove("password");
-                } catch (GeneralSecurityException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (getContext() != null) {
+                    try {
+                        SharedPreferences sp = EncryptedSharedPreferences.create(
+                                getContext(),
+                                "secret_shared_prefs",
+                                masterKeyAlias,
+                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        );
+                        SharedPreferences.Editor editor = sp.edit();
+                        editor.remove("username");
+                        editor.remove("password");
+                    } catch (GeneralSecurityException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    NavHostFragment.findNavController(HomeScreen.this)
+                            .navigate(R.id.action_homeScreen_to_login);
                 }
-                NavHostFragment.findNavController(HomeScreen.this)
-                        .navigate(R.id.action_homeScreen_to_login);
             }
         });
+
     }
 
     @Override
