@@ -1,7 +1,5 @@
 package com.example.findmyandroid.ui.login;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
@@ -11,7 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
-import androidx.security.crypto.MasterKeys;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -40,8 +37,7 @@ public class LoginFragment extends Fragment {
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
     SharedPreferences sp;
-    MasterKey masterKeyAlias = new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
-
+    MasterKey masterKeyAlias;
     public LoginFragment() throws GeneralSecurityException, IOException {
     }
 
@@ -57,21 +53,22 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        try {
-            sp = EncryptedSharedPreferences.create(
-                    getContext(),
-                    "secret_shared_prefs",
-                    masterKeyAlias,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(getContext()!=null){
+            try {
+                masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
+                sp = EncryptedSharedPreferences.create(
+                        getContext(),
+                        "secret_shared_prefs",
+                        masterKeyAlias,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                );
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
         if(sp.contains("username")&&sp.contains("password")){
             loginViewModel.login(sp.getString("username",""), sp.getString("password",""));
             NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
