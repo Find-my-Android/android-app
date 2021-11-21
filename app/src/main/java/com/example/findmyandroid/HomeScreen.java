@@ -98,6 +98,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
                         SharedPreferences.Editor editor = sp.edit();
                         editor.remove("username");
                         editor.remove("password");
+                        editor.commit();
                     } catch (GeneralSecurityException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
