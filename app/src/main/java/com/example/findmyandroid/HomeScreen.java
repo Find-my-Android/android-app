@@ -2,25 +2,19 @@ package com.example.findmyandroid;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
 
-import com.example.findmyandroid.data.LoginDataSource;
 import com.example.findmyandroid.databinding.FragmentHomeScreenBinding;
-import com.example.findmyandroid.ui.login.LoginFragment;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,9 +25,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 
 public class HomeScreen extends Fragment implements OnMapReadyCallback {
 
@@ -41,9 +32,6 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
 
     MapView mapView;
     GoogleMap map;
-    MasterKey masterKeyAlias;
-    public HomeScreen() throws GeneralSecurityException, IOException {
-    }
 
     @SuppressLint("MissingPermission")
     public View onCreateView(
@@ -78,38 +66,10 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         binding.buttonLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LoginDataSource logout = new LoginDataSource();
-                logout.logout();
-                String welcome = getString(R.string.successLogout);
-                // TODO : initiate successful logged in experience
-                if (getContext() != null && getContext().getApplicationContext() != null) {
-                    Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-                }
-                if (getContext() != null) {
-                    try {
-                        masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
-                        SharedPreferences sp = EncryptedSharedPreferences.create(
-                                getContext(),
-                                "secret_shared_prefs",
-                                masterKeyAlias,
-                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        );
-                        SharedPreferences.Editor editor = sp.edit();
-                        editor.remove("username");
-                        editor.remove("password");
-                        editor.commit();
-                    } catch (GeneralSecurityException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    NavHostFragment.findNavController(HomeScreen.this)
-                            .navigate(R.id.action_homeScreen_to_login);
-                }
+                NavHostFragment.findNavController(HomeScreen.this)
+                        .navigate(R.id.action_homeScreen_to_login);
             }
         });
-
     }
 
     @Override
