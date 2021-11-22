@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.example.findmyandroid.ui.login.LoginFragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.RequiresApi;
@@ -28,12 +29,13 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
+    String android_id;
+    String device_name;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        String android_id;
-        String device_name;
+        Bundle bundle = new Bundle();
         TelephonyManager tMgr = (TelephonyManager)this.getSystemService(this.TELEPHONY_SERVICE);
         String phoneNumber;
         super.onCreate(savedInstanceState);
@@ -42,6 +44,11 @@ public class MainActivity extends AppCompatActivity {
                     Settings.Secure.ANDROID_ID);
             device_name = android.os.Build.MODEL;
             //TODO: Test with real phone number?
+            bundle.putString("softwareID", android_id);
+            bundle.putString("deviceName", device_name);
+
+            LoginFragment frag = new LoginFragment();
+            frag.setArguments(bundle);
             //phoneNumber = tMgr.getLine1Number();
             Log.i("SoftwareID: ", android_id);
         } catch (Exception e) {
@@ -50,6 +57,14 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+    }
+
+    public String getSoftwareID() {
+        return android_id;
+    }
+
+    public String getDeviceName() {
+        return device_name;
     }
 
 //    @Override
