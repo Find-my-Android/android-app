@@ -19,13 +19,11 @@ import java.lang.Object;
  * Class that handles authentication w/ login credentials and retrieves user information.
  */
 public class LoginDataSource {
-    LoggedInUser newUser;
 
     public Result<LoggedInUser> login(String username, String password) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         try {
-            //User registration: user/signup
             URL url = new URL("https://fmya.duckdns.org:8445/user/login");
             HttpURLConnection http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("GET");
@@ -82,11 +80,10 @@ public class LoginDataSource {
             String first_name = user.getString("first_name").toString();
             String name = first_name + " " + last_name;
 
-            newUser =
+            LoggedInUser newUser =
                     new LoggedInUser(
                             java.util.UUID.randomUUID().toString(),
-                            name, token);
-            //TODO: upload phone details to database: imei, name, phone_num
+                            name);
 
             return new Result.Success<>(newUser);
 
@@ -97,6 +94,6 @@ public class LoginDataSource {
     }
 
     public void logout() {
-        newUser = new LoggedInUser("", "", "");
+        // TODO: revoke authentication
     }
 }

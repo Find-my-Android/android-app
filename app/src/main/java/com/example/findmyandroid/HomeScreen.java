@@ -8,14 +8,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.findmyandroid.data.LoginDataSource;
 import com.example.findmyandroid.databinding.FragmentHomeScreenBinding;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdate;
@@ -68,13 +66,6 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         binding.buttonLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LoginDataSource logout = new LoginDataSource();
-                logout.logout();
-                String welcome = getString(R.string.successLogout);
-                // TODO : initiate successful logged in experience
-                if (getContext() != null && getContext().getApplicationContext() != null) {
-                    Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-                }
                 NavHostFragment.findNavController(HomeScreen.this)
                         .navigate(R.id.action_homeScreen_to_login);
             }
