@@ -7,10 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,22 +26,17 @@ import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
-    SharedPreferences sp;
-    MasterKey masterKeyAlias;
-    public LoginFragment() throws GeneralSecurityException, IOException {
-    }
-
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
         binding = FragmentLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
@@ -53,30 +45,9 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory()).get(LoginViewModel.class);
-        if(getContext()!=null){
-            try {
-                masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
-                sp = EncryptedSharedPreferences.create(
-                        getContext(),
-                        "secret_shared_prefs",
-                        masterKeyAlias,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                );
-            } catch (GeneralSecurityException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if(sp.contains("username")&&sp.contains("password")){
-            loginViewModel.login(sp.getString("username",""), sp.getString("password",""));
-            NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
-        }
 
-
-
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
+                .get(LoginViewModel.class);
 
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
@@ -86,7 +57,8 @@ public class LoginFragment extends Fragment {
         binding.textForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_forgotPassword);
+                NavHostFragment.findNavController(LoginFragment.this)
+                        .navigate(R.id.action_login_to_forgotPassword);
             }
         });
 
@@ -94,7 +66,8 @@ public class LoginFragment extends Fragment {
         binding.createAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_userRegistration);
+                NavHostFragment.findNavController(LoginFragment.this)
+                        .navigate(R.id.action_login_to_userRegistration);
             }
         });
 
@@ -154,7 +127,8 @@ public class LoginFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(), passwordEditText.getText().toString());
+                    loginViewModel.login(usernameEditText.getText().toString(),
+                            passwordEditText.getText().toString());
                 }
                 return false;
             }
@@ -164,7 +138,8 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(), passwordEditText.getText().toString());
+                loginViewModel.login(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString());
             }
         });
     }
@@ -175,16 +150,17 @@ public class LoginFragment extends Fragment {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         }
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString("username", binding.username.getText().toString());
-        editor.putString("password",binding.password.getText().toString());
-        editor.commit();
-        NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
+
+        NavHostFragment.findNavController(LoginFragment.this)
+                .navigate(R.id.action_login_to_homeScreen);
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
         if (getContext() != null && getContext().getApplicationContext() != null) {
-            Toast.makeText(getContext().getApplicationContext(), errorString, Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    getContext().getApplicationContext(),
+                    errorString,
+                    Toast.LENGTH_LONG).show();
         }
     }
 
