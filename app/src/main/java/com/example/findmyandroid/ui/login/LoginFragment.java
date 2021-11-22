@@ -11,6 +11,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.findmyandroid.MainActivity;
 import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
@@ -30,22 +32,28 @@ public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
+    String softwareID;
+    String deviceName;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         binding = FragmentLoginBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+        MainActivity ac = (MainActivity) getActivity();
+        softwareID = ac.getSoftwareID();
+        deviceName = ac.getDeviceName();
 
+        Log.i("test", softwareID);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        softwareID = softwareID;
+        deviceName = deviceName;
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
@@ -128,7 +136,7 @@ public class LoginFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
+                            passwordEditText.getText().toString(), softwareID, deviceName);
                 }
                 return false;
             }
@@ -139,9 +147,14 @@ public class LoginFragment extends Fragment {
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
+                        passwordEditText.getText().toString(), softwareID, deviceName);
             }
         });
+    }
+
+    private void setDeviceInfo(String softwareID, String deviceName) {
+        softwareID = softwareID;
+        deviceName = deviceName;
     }
 
     private void updateUiWithUser(LoggedInUserView model) {

@@ -21,7 +21,7 @@ import java.lang.Object;
 public class LoginDataSource {
     LoggedInUser newUser;
 
-    public Result<LoggedInUser> login(String username, String password) {
+    public Result<LoggedInUser> login(String username, String password, String softwareID, String deviceName) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         try {
@@ -88,6 +88,9 @@ public class LoginDataSource {
                             name, token);
             //TODO: upload phone details to database: imei, name, phone_num
 
+            String test = softwareID;
+            String test2 = deviceName;
+            Log.i("test", softwareID);
             return new Result.Success<>(newUser);
 
         } catch (Exception e) {
