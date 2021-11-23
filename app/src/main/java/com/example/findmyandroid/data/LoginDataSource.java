@@ -22,6 +22,20 @@ import java.lang.Object;
  */
 public class LoginDataSource {
     LoggedInUser newUser;
+    private String dtoken;
+    String duserID;
+    String dsoftwareID;
+    String ddeviceName;
+    String phoneNumber;
+
+    public void setdToken(String input) {
+        dtoken = input;
+    }
+
+    public String getdToken() {
+        return dtoken;
+    }
+
 
     public Result<LoggedInUser> login(String username, String password, String softwareID, String deviceName) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -95,14 +109,13 @@ public class LoginDataSource {
             DecimalFormat df3 = new DecimalFormat("000"); // 3 zeros
             DecimalFormat df4 = new DecimalFormat("0000"); // 4 zeros
 
-            String phoneNumber = df3.format(num1) + "-" + df3.format(num2) + "-" + df4.format(num3);
+            phoneNumber = df3.format(num1) + "-" + df3.format(num2) + "-" + df4.format(num3);
 
             Log.i("test",phoneNumber);
             newUser =
                     new LoggedInUser(
                             java.util.UUID.randomUUID().toString(),
                             name, token);
-            //TODO: upload phone details to database: imei, name, phone_num
             url = new URL("https://fmya.duckdns.org:8445/phone/create");
             http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("GET");
@@ -112,7 +125,10 @@ public class LoginDataSource {
             http.setRequestProperty("Authorization", "Bearer " + token);
 
             data = "{\"software_id\": \"" + softwareID + "\", \"user_id\": \"" + userID + "\", \"name\": \"" + deviceName + "\", \"phone_num\": \"" + phoneNumber + "\"}";
-
+            dsoftwareID = softwareID;
+            ddeviceName = deviceName;
+            setdToken(token);
+            duserID = userID;
             out = data.getBytes(StandardCharsets.UTF_8);
 
             stream = http.getOutputStream();
