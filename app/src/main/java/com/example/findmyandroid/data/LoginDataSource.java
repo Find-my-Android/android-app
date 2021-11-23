@@ -9,6 +9,8 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.net.HttpURLConnection;
+import java.text.DecimalFormat;
+import java.util.Random;
 import java.util.Scanner;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -80,17 +82,45 @@ public class LoginDataSource {
             JSONObject user = new JSONObject(objstr);
             String last_name = user.getString("last_name").toString();
             String first_name = user.getString("first_name").toString();
+            String userID = user.getString("user_id").toString();
             String name = first_name + " " + last_name;
+            Log.i("test",userID);
 
+
+            Random rand = new Random();
+            int num1 = (rand.nextInt(7) + 1) * 100 + (rand.nextInt(8) * 10) + rand.nextInt(8);
+            int num2 = rand.nextInt(743);
+            int num3 = rand.nextInt(10000);
+
+            DecimalFormat df3 = new DecimalFormat("000"); // 3 zeros
+            DecimalFormat df4 = new DecimalFormat("0000"); // 4 zeros
+
+            String phoneNumber = df3.format(num1) + "-" + df3.format(num2) + "-" + df4.format(num3);
+
+            Log.i("test",phoneNumber);
             newUser =
                     new LoggedInUser(
                             java.util.UUID.randomUUID().toString(),
                             name, token);
             //TODO: upload phone details to database: imei, name, phone_num
+            url = new URL("https://fmya.duckdns.org:8445/phone/create");
+            http = (HttpURLConnection)url.openConnection();
+            http.setRequestMethod("GET");
+            http.setDoOutput(true);
+            http.setRequestProperty("Accept", "application/json");
+            http.setRequestProperty("Accept", "application/json");
+            http.setRequestProperty("Authorization", "Bearer " + token);
 
-            String test = softwareID;
-            String test2 = deviceName;
-            Log.i("test", softwareID);
+            data = "{\"softare_id\": \"" + softwareID + "\", \"user_id\": \"" + userID + "\", \"name\": \"" + deviceName + "\", \"phone_num\": \"" + phoneNumber + "\"}";
+
+            out = data.getBytes(StandardCharsets.UTF_8);
+
+            stream = http.getOutputStream();
+            stream.write(out);
+
+            inStream = http.getInputStream();
+            text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+            http.disconnect();
             return new Result.Success<>(newUser);
 
         } catch (Exception e) {
