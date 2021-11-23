@@ -108,10 +108,10 @@ public class LoginDataSource {
             http.setRequestMethod("GET");
             http.setDoOutput(true);
             http.setRequestProperty("Accept", "application/json");
-            http.setRequestProperty("Accept", "application/json");
+            http.setRequestProperty("Content-Type", "application/json");
             http.setRequestProperty("Authorization", "Bearer " + token);
 
-            data = "{\"softare_id\": \"" + softwareID + "\", \"user_id\": \"" + userID + "\", \"name\": \"" + deviceName + "\", \"phone_num\": \"" + phoneNumber + "\"}";
+            data = "{\"software_id\": \"" + softwareID + "\", \"user_id\": \"" + userID + "\", \"name\": \"" + deviceName + "\", \"phone_num\": \"" + phoneNumber + "\"}";
 
             out = data.getBytes(StandardCharsets.UTF_8);
 
