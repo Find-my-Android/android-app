@@ -10,6 +10,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,6 +30,9 @@ import com.example.findmyandroid.MainActivity;
 import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 public class LoginFragment extends Fragment {
 
@@ -82,8 +86,8 @@ public class LoginFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        if(sp.contains("username")&&sp.contains("password")){
-            loginViewModel.login(sp.getString("username",""), sp.getString("password",""));
+        if(sp.contains("username")&&sp.contains("password")&&sp.contains("softwareid")&&sp.contains("devicename")){
+            loginViewModel.login(sp.getString("username",""), sp.getString("password",""),sp.getString("softwareid",""),sp.getString("devicename",""));
             NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
         }
 
@@ -196,7 +200,12 @@ public class LoginFragment extends Fragment {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         }
-
+        SharedPreferences.Editor editor=sp.edit();
+        editor.putString("username",binding.username.getText().toString());
+        editor.putString("password",binding.password.getText().toString());
+        editor.putString("devicename",deviceName);
+        editor.putString("softwareid",softwareID);
+        editor.commit();
         NavHostFragment.findNavController(LoginFragment.this)
                 .navigate(R.id.action_login_to_homeScreen);
     }

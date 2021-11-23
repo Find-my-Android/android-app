@@ -2,6 +2,7 @@ package com.example.findmyandroid;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
 
 import com.example.findmyandroid.data.LoginDataSource;
 import com.example.findmyandroid.databinding.FragmentHomeScreenBinding;
@@ -26,6 +29,9 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 
 public class HomeScreen extends Fragment implements OnMapReadyCallback {
@@ -91,6 +97,8 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
                         SharedPreferences.Editor editor = sp.edit();
                         editor.remove("username");
                         editor.remove("password");
+                        editor.remove("softwareid");
+                        editor.remove("devicename");
                         editor.commit();
                     } catch (GeneralSecurityException e) {
                         e.printStackTrace();
