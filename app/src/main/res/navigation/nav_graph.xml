@@ -30,8 +30,8 @@
         android:id="@+id/action_userRegstration_to_login"
         app:destination="@id/loginFragment"/>
         <action
-            android:id="@+id/action_userRegstration_to_homeScreen"
-            app:destination="@id/homeScreen"/>
+            android:id="@+id/action_userRegstration_to_loginScreen"
+            app:destination="@id/loginFragment"/>
     </fragment>
     <fragment
         android:id="@+id/homeScreen"

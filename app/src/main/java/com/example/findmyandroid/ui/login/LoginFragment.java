@@ -10,10 +10,10 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,17 +25,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.findmyandroid.MainActivity;
 import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
+    String softwareID;
+    String deviceName;
+
     SharedPreferences sp;
     MasterKey masterKeyAlias;
     public LoginFragment() throws GeneralSecurityException, IOException {
@@ -44,15 +45,26 @@ public class LoginFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         binding = FragmentLoginBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+        MainActivity ac = (MainActivity) getActivity();
+        softwareID = ac.getSoftwareID();
+        deviceName = ac.getDeviceName();
 
+        Log.i("test", softwareID);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        softwareID = softwareID;
+        deviceName = deviceName;
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
+                .get(LoginViewModel.class);
+
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory()).get(LoginViewModel.class);
         if(getContext()!=null){
             try {
@@ -86,7 +98,8 @@ public class LoginFragment extends Fragment {
         binding.textForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_forgotPassword);
+                NavHostFragment.findNavController(LoginFragment.this)
+                        .navigate(R.id.action_login_to_forgotPassword);
             }
         });
 
@@ -94,7 +107,8 @@ public class LoginFragment extends Fragment {
         binding.createAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_userRegistration);
+                NavHostFragment.findNavController(LoginFragment.this)
+                        .navigate(R.id.action_login_to_userRegistration);
             }
         });
 
@@ -154,7 +168,8 @@ public class LoginFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(), passwordEditText.getText().toString());
+                    loginViewModel.login(usernameEditText.getText().toString(),
+                            passwordEditText.getText().toString(), softwareID, deviceName);
                 }
                 return false;
             }
@@ -164,9 +179,15 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(), passwordEditText.getText().toString());
+                loginViewModel.login(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString(), softwareID, deviceName);
             }
         });
+    }
+
+    private void setDeviceInfo(String softwareID, String deviceName) {
+        softwareID = softwareID;
+        deviceName = deviceName;
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
@@ -175,16 +196,17 @@ public class LoginFragment extends Fragment {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         }
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString("username", binding.username.getText().toString());
-        editor.putString("password",binding.password.getText().toString());
-        editor.commit();
-        NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
+
+        NavHostFragment.findNavController(LoginFragment.this)
+                .navigate(R.id.action_login_to_homeScreen);
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
         if (getContext() != null && getContext().getApplicationContext() != null) {
-            Toast.makeText(getContext().getApplicationContext(), errorString, Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    getContext().getApplicationContext(),
+                    errorString,
+                    Toast.LENGTH_LONG).show();
         }
     }
 
