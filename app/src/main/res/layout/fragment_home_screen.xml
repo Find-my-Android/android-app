@@ -18,17 +18,6 @@
         app:layout_constraintTop_toBottomOf="@id/changePassword"
         app:layout_constraintVertical_bias="0.538" />
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapview"
-        android:layout_width="300sp"
-        android:layout_height="300sp"
-        android:layout_marginTop="90dp"
-        app:layout_constraintBottom_toTopOf="@+id/changePassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_first"
-        tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
         android:id="@+id/textview_first"
@@ -52,7 +41,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapview" />
+        app:layout_constraintTop_toBottomOf="@+id/map" />
 
     <TextView
         android:id="@+id/textViewTracking"
@@ -64,7 +53,7 @@
         android:layout_marginBottom="10dp"
         android:text="Tracking"
         android:textSize="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/mapview"
+        app:layout_constraintBottom_toTopOf="@+id/map"
         app:layout_constraintEnd_toStartOf="@+id/seekBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_first"
@@ -81,11 +70,24 @@
         android:layout_marginBottom="16dp"
         android:max="1"
         android:progress="0"
-        app:layout_constraintBottom_toTopOf="@+id/mapview"
+        app:layout_constraintBottom_toTopOf="@+id/map"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textViewTracking"
         app:layout_constraintTop_toBottomOf="@+id/textview_first"
         app:layout_constraintVertical_bias="0.35" />
 
+    <FrameLayout
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginStart="55dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginBottom="60dp"
+        app:layout_constraintBottom_toTopOf="@+id/changePassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textview_first"
+        tools:context="example.com.mapexample.MapsActivity" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
