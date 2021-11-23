@@ -37,7 +37,7 @@ public class UserRegistration extends Fragment {
             @Override
             public void onClick(View view) {
                 NavHostFragment.findNavController(UserRegistration.this)
-                        .navigate(R.id.action_userRegstration_to_homeScreen);
+                        .navigate(R.id.action_userRegstration_to_login);
             }
         });
 
