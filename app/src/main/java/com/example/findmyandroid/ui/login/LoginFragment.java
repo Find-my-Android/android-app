@@ -7,7 +7,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,12 +31,21 @@ import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
     String softwareID;
     String deviceName;
+
+    SharedPreferences sp;
+    MasterKey masterKeyAlias;
+    public LoginFragment() throws GeneralSecurityException, IOException {
+    }
+
 
     @Nullable
     @Override
@@ -56,6 +68,31 @@ public class LoginFragment extends Fragment {
         deviceName = deviceName;
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
+
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory()).get(LoginViewModel.class);
+        if(getContext()!=null){
+            try {
+                masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
+                sp = EncryptedSharedPreferences.create(
+                        getContext(),
+                        "secret_shared_prefs",
+                        masterKeyAlias,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                );
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(sp.contains("username")&&sp.contains("password")&&sp.contains("softwareid")&&sp.contains("devicename")){
+            loginViewModel.login(sp.getString("username",""), sp.getString("password",""),sp.getString("softwareid",""),sp.getString("devicename",""));
+            NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
+        }
+
+
+
 
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
@@ -163,7 +200,12 @@ public class LoginFragment extends Fragment {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         }
-
+        SharedPreferences.Editor editor=sp.edit();
+        editor.putString("username",binding.username.getText().toString());
+        editor.putString("password",binding.password.getText().toString());
+        editor.putString("devicename",deviceName);
+        editor.putString("softwareid",softwareID);
+        editor.commit();
         NavHostFragment.findNavController(LoginFragment.this)
                 .navigate(R.id.action_login_to_homeScreen);
     }
