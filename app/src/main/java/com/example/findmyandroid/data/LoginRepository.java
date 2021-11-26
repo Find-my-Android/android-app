@@ -1,5 +1,6 @@
 package com.example.findmyandroid.data;
 
+import com.example.findmyandroid.data.model.CreateUser;
 import com.example.findmyandroid.data.model.LoggedInUser;
 
 /**
@@ -43,11 +44,21 @@ public class LoginRepository {
         // @see https://developer.android.com/training/articles/keystore
     }
 
+
     public Result<LoggedInUser> login(String username, String password, String softwareID, String deviceName) {
         // handle login
         Result<LoggedInUser> result = dataSource.login(username, password, softwareID, deviceName);
         if (result instanceof Result.Success) {
             setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
+        }
+        return result;
+    }
+
+    public Result <CreateUser> createUser(String firstName, String lastName, String email, String primaryPhoneNum, String secondaryPhoneNum, String password) {
+        //handle create user
+        Result <CreateUser> result = dataSource.createUser(firstName, lastName, email, primaryPhoneNum, secondaryPhoneNum, password);
+        if (result instanceof Result.Success) {
+            //TODO: create user in backend endpoint
         }
         return result;
     }

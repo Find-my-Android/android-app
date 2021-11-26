@@ -3,6 +3,7 @@ package com.example.findmyandroid.data;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.example.findmyandroid.data.model.CreateUser;
 import com.example.findmyandroid.data.model.LoggedInUser;
 import java.net.*;
 import java.io.*;
@@ -34,6 +35,18 @@ public class LoginDataSource {
 
     public String getdToken() {
         return dtoken;
+    }
+
+    public Result<CreateUser> createUser(String nfirstName, String nlastName, String nemail, String nprimaryPhoneNum, String nsecondaryPhoneNum, String npassword) {
+        String firstName = nfirstName;
+        String lastName = nlastName;
+        String email = nemail;
+        String primaryPhoneNum = nprimaryPhoneNum;
+        String secondaryPhoneNum = nsecondaryPhoneNum;
+        String password = npassword;
+        CreateUser createdUser = new CreateUser(firstName, lastName, email, primaryPhoneNum, secondaryPhoneNum, password);
+
+        return new Result.Success<>(createdUser);
     }
 
 

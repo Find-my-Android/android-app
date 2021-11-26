@@ -8,6 +8,7 @@ import android.util.Patterns;
 
 import com.example.findmyandroid.data.LoginRepository;
 import com.example.findmyandroid.data.Result;
+import com.example.findmyandroid.data.model.CreateUser;
 import com.example.findmyandroid.data.model.LoggedInUser;
 import com.example.findmyandroid.R;
 
@@ -32,6 +33,10 @@ public class LoginViewModel extends ViewModel {
     LiveData<LoginResult> getLoginResult() {
         return loginResult;
     }
+
+   public void createUser(String nfirstName, String nlastName, String nemail, String nprimaryPhoneNum, String nsecondaryPhoneNum, String npassword) {
+        Result <CreateUser> result = loginRepository.createUser(nfirstName, nlastName, nemail, nprimaryPhoneNum, nsecondaryPhoneNum, npassword);
+   }
 
     public void login(String username, String password, String softwareID, String deviceName) {
         // can be launched in a separate asynchronous job
@@ -63,7 +68,7 @@ public class LoginViewModel extends ViewModel {
         if (username.contains("@")) {
             return Patterns.EMAIL_ADDRESS.matcher(username).matches();
         } else {
-            return !username.trim().isEmpty();
+            return false;
         }
     }
 

@@ -91,9 +91,6 @@ public class LoginFragment extends Fragment {
             NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
         }
 
-
-
-
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
