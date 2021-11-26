@@ -45,8 +45,35 @@ public class LoginDataSource {
         String secondaryPhoneNum = nsecondaryPhoneNum;
         String password = npassword;
         CreateUser createdUser = new CreateUser(firstName, lastName, email, primaryPhoneNum, secondaryPhoneNum, password);
+        Log.i("info", createdUser.getFirstName() + createdUser.getPassword());
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
-        return new Result.Success<>(createdUser);
+        try {
+            URL url = new URL("https://fmya.duckdns.org:8445/user/signup");
+            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http.setRequestMethod("GET");
+            http.setDoOutput(true);
+            http.setRequestProperty("Accept", "application/json");
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("charset", "utf-8");
+
+//            String data = "{\"email\": \"" + username + "\", \"password\": \"" + password + "\", \"source\": \"android\"}";
+//
+//            byte[] out = data.getBytes(StandardCharsets.UTF_8);
+//
+//            OutputStream stream = http.getOutputStream();
+//            stream.write(out);
+//
+//            InputStream inStream = http.getInputStream();
+//            String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+            http.disconnect();
+
+            return new Result.Success<>(createdUser);
+        } catch (Exception e) {
+            Log.e("error", e.toString());
+            return new Result.Error(new IOException("Error creating new user", e));
+        }
     }
 
 
