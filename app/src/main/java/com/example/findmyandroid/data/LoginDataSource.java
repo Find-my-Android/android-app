@@ -58,15 +58,16 @@ public class LoginDataSource {
             http.setRequestProperty("Content-Type", "application/json");
             http.setRequestProperty("charset", "utf-8");
 
-//            String data = "{\"email\": \"" + username + "\", \"password\": \"" + password + "\", \"source\": \"android\"}";
-//
-//            byte[] out = data.getBytes(StandardCharsets.UTF_8);
-//
-//            OutputStream stream = http.getOutputStream();
-//            stream.write(out);
-//
-//            InputStream inStream = http.getInputStream();
-//            String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+            String data = "{\"first_name\": \"" + createdUser.getFirstName() + "\", \"last_name\": \"" + createdUser.getLastName() + "\", \"email\": \"" + createdUser.getEmail() + "\", \"primary_num\": \"" + createdUser.getPrimaryPhoneNum() + "\", \"secondary_num\": \"" + createdUser.getSecondaryPhoneNum() + "\", \"password\": \"" + createdUser.getPassword() + "\"}";
+
+            byte[] out = data.getBytes(StandardCharsets.UTF_8);
+
+            OutputStream stream = http.getOutputStream();
+            stream.write(out);
+
+            InputStream inStream = http.getInputStream();
+            String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+            Log.i("info", text);
             http.disconnect();
 
             return new Result.Success<>(createdUser);

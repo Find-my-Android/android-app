@@ -16,6 +16,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
+import com.example.findmyandroid.data.Result;
 import com.example.findmyandroid.data.model.CreateUser;
 import com.example.findmyandroid.databinding.FragmentUserRegistrationBinding;
 import com.example.findmyandroid.ui.login.LoginViewModel;
@@ -140,11 +141,14 @@ public class UserRegistration extends Fragment {
                 }
 
                 CreateUser newUser = new CreateUser(firstName, lastName, email, primaryPhone, secondaryPhone, firstPassword);
-                loginViewModel.createUser(newUser.getFirstName(), newUser.getLastName(), newUser.getEmail(), newUser.getPrimaryPhoneNum(), newUser.getSecondaryPhoneNum(), newUser.getPassword());
+                Boolean result = loginViewModel.createUser(newUser.getFirstName(), newUser.getLastName(), newUser.getEmail(), newUser.getPrimaryPhoneNum(), newUser.getSecondaryPhoneNum(), newUser.getPassword());
                 Log.i("user", newUser.getFirstName());
-                successfullyCreatedUser(firstName, lastName);
-                NavHostFragment.findNavController(UserRegistration.this)
-                        .navigate(R.id.action_userRegstration_to_login);
+                if(result) {
+                    successfullyCreatedUser(firstName, lastName);
+                    NavHostFragment.findNavController(UserRegistration.this)
+                            .navigate(R.id.action_userRegstration_to_login);
+                }
+                errorCreatingUser(firstName, lastName);
             }
         });
 
@@ -179,6 +183,16 @@ public class UserRegistration extends Fragment {
 
     public void successfullyCreatedUser(String firstName, String lastName) {
         String success = "Successfully created user for " + firstName + " " + lastName;
+        if (getContext() != null && getContext().getApplicationContext() != null) {
+            Toast.makeText(
+                    getContext().getApplicationContext(),
+                    success,
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void errorCreatingUser(String firstName, String lastName) {
+        String success = "Error when creating user for " + firstName + " " + lastName;
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(
                     getContext().getApplicationContext(),

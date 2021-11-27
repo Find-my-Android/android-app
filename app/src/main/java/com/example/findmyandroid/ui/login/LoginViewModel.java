@@ -34,8 +34,14 @@ public class LoginViewModel extends ViewModel {
         return loginResult;
     }
 
-   public void createUser(String nfirstName, String nlastName, String nemail, String nprimaryPhoneNum, String nsecondaryPhoneNum, String npassword) {
+   public boolean createUser(String nfirstName, String nlastName, String nemail, String nprimaryPhoneNum, String nsecondaryPhoneNum, String npassword) {
         Result <CreateUser> result = loginRepository.createUser(nfirstName, nlastName, nemail, nprimaryPhoneNum, nsecondaryPhoneNum, npassword);
+
+       if (result instanceof Result.Success) {
+           return true;
+       } else {
+           return false;
+       }
    }
 
     public void login(String username, String password, String softwareID, String deviceName) {
