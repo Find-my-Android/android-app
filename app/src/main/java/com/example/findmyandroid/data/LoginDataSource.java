@@ -52,7 +52,7 @@ public class LoginDataSource {
         try {
             URL url = new URL("https://fmya.duckdns.org:8445/user/signup");
             HttpURLConnection http = (HttpURLConnection)url.openConnection();
-            http.setRequestMethod("GET");
+            http.setRequestMethod("POST");
             http.setDoOutput(true);
             http.setRequestProperty("Accept", "application/json");
             http.setRequestProperty("Content-Type", "application/json");
