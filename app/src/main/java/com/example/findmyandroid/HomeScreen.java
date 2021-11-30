@@ -3,6 +3,7 @@ package com.example.findmyandroid;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -43,12 +44,42 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 
+import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.net.Uri;
+import android.os.IBinder;
+import android.provider.Settings;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+
+
 public class HomeScreen extends Fragment implements OnMapReadyCallback,
         LocationListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     private FragmentHomeScreenBinding binding;
     private SupportMapFragment mapFragment;
+
+
+    public BackgroundService gpsService;
+    public boolean mTracking = false;
+
 
     private GoogleMap mMap;
     Location mLastLocation;
@@ -67,7 +98,6 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
     ) {
 
         binding = FragmentHomeScreenBinding.inflate(inflater, container, false);
-
         return binding.getRoot();
 
     }
@@ -89,7 +119,33 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
                         .navigate(R.id.action_homeScreen_to_changePassword);
             }
         });
+/*
+        final Intent intent = new Intent(this.getActivity(), BackgroundService.class);
+        getActivity().startService(intent);
+//        this.getApplication().startForegroundService(intent);
+        this.getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);*/
+/*
+        Dexter.withActivity(getActivity())
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        gpsService.startTracking();
+                        mTracking = true;
+                    }
 
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        if (response.isPermanentlyDenied()) {
+                            openSettings();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();*/
         binding.buttonLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -135,15 +191,15 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
         binding = null;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
+/*
+    private void openSettings() {
+        Intent intent = new Intent();
+        intent.setAction( Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+        intent.setData(uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }*/
 
     @Override
     public void onLowMemory() {
@@ -248,23 +304,30 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
 
     }
 
-    public void registerForActivityResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.e("ASDFSA", "REG");
-        if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                buildGoogleApiClient();
-                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                mMap.setMyLocationEnabled(true);
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+/*
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            String name = className.getClassName();
+            if (name.endsWith("BackgroundService")) {
+                gpsService = ((BackgroundService.LocationServiceBinder) service).getService();
             }
         }
-    }
+
+        public void onServiceDisconnected(ComponentName className) {
+            if (className.getClassName().equals("BackgroundService")) {
+                gpsService = null;
+            }
+        }
+    };*/
+
 }
