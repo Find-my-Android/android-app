@@ -14,10 +14,12 @@ import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 public class BackgroundService extends Service {
     private final LocationServiceBinder binder = new LocationServiceBinder();
@@ -49,9 +51,6 @@ public class BackgroundService extends Service {
         public void onLocationChanged(Location location)
         {
            MyAppApplication mApp = ((MyAppApplication)getApplicationContext());
-            //locationDataSource.sendLocation(Double.toString(location.getLatitude()),Double.toString(location.getLongitude()), mApp.getSoftware_id(), mApp.getToken());
-            Log.e("A",""+mApp.getSoftware_id());
-            Log.e("A", mApp.getToken());
             mLastLocation = location;
             Log.e(TAG, "LocationChanged: "+location);
 
@@ -61,7 +60,7 @@ public class BackgroundService extends Service {
                 //
                 URL url = new URL("https://fmya.duckdns.org:8445/phone/track");
                 HttpURLConnection http = (HttpURLConnection)url.openConnection();
-                http.setRequestMethod("POST");
+                http.setRequestMethod("PATCH");
                 http.setDoOutput(true);
                 http.setRequestProperty("Accept", "application/json");
                 http.setRequestProperty("Content-Type", "application/json");
@@ -72,6 +71,9 @@ public class BackgroundService extends Service {
 
                 OutputStream stream = http.getOutputStream();
                 stream.write(out);
+
+                InputStream inStream = http.getInputStream();
+                String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
                 http.disconnect();
 
             } catch (Exception e) {
