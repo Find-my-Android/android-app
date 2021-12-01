@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.findmyandroid.MainActivity;
+import com.example.findmyandroid.MyAppApplication;
 import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
@@ -73,6 +74,7 @@ public class LoginFragment extends Fragment {
         if(getContext()!=null){
             try {
                 masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
+
                 sp = EncryptedSharedPreferences.create(
                         getContext(),
                         "secret_shared_prefs",
@@ -83,11 +85,13 @@ public class LoginFragment extends Fragment {
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                Log.e("F","E2");
                 e.printStackTrace();
             }
         }
-        if(sp.contains("username")&&sp.contains("password")&&sp.contains("softwareid")&&sp.contains("devicename")){
-            loginViewModel.login(sp.getString("username",""), sp.getString("password",""),sp.getString("softwareid",""),sp.getString("devicename",""));
+        if(sp!=null && sp.contains("username")&&sp.contains("password")&&sp.contains("softwareid")&&sp.contains("devicename")){
+            MyAppApplication mApp = ((MyAppApplication)getContext().getApplicationContext());
+            mApp.setToken(loginViewModel.login(sp.getString("username",""), sp.getString("password",""),sp.getString("softwareid",""),sp.getString("devicename","")));
             NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
         }
 
@@ -172,8 +176,9 @@ public class LoginFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString(), softwareID, deviceName);
+                    MyAppApplication mApp = ((MyAppApplication)getActivity().getApplicationContext());
+                    mApp.setToken(loginViewModel.login(usernameEditText.getText().toString(),
+                            passwordEditText.getText().toString(), softwareID, deviceName));
                 }
                 return false;
             }
@@ -183,8 +188,9 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString(), softwareID, deviceName);
+                MyAppApplication mApp = ((MyAppApplication)getActivity().getApplicationContext());
+                mApp.setToken(loginViewModel.login(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString(), softwareID, deviceName));
             }
         });
     }
@@ -198,14 +204,14 @@ public class LoginFragment extends Fragment {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience
         if (getContext() != null && getContext().getApplicationContext() != null) {
-            Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-        }
+            Toast.makeText(getActivity().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+        }/*
         SharedPreferences.Editor editor=sp.edit();
         editor.putString("username",binding.username.getText().toString());
         editor.putString("password",binding.password.getText().toString());
         editor.putString("devicename",deviceName);
         editor.putString("softwareid",softwareID);
-        editor.commit();
+        editor.commit();*/
         NavHostFragment.findNavController(LoginFragment.this)
                 .navigate(R.id.action_login_to_homeScreen);
     }

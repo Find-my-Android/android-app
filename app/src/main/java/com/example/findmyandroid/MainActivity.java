@@ -1,11 +1,9 @@
 package com.example.findmyandroid;
 
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 
 import com.example.findmyandroid.ui.login.LoginFragment;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,17 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
 import com.example.findmyandroid.databinding.ActivityMainBinding;
-
-import android.view.Menu;
-import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
             //TODO: Test with real phone number?
             bundle.putString("softwareID", android_id);
             bundle.putString("deviceName", device_name);
+            MyAppApplication mApp = ((MyAppApplication)getApplicationContext());
+            mApp.setSoftware_id(android_id);
 
             LoginFragment frag = new LoginFragment();
             frag.setArguments(bundle);

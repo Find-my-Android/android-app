@@ -4,7 +4,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.example.findmyandroid.data.model.LoggedInUser;
-import java.net.*;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -13,9 +13,8 @@ import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.Scanner;
 import org.json.JSONObject;
-import org.json.JSONArray;
+
 import java.io.IOException;
-import java.lang.Object;
 
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
@@ -66,6 +65,7 @@ public class LoginDataSource {
             }
             http.disconnect();
 
+            //
             url = new URL("https://fmya.duckdns.org:8445/user");
             http = (HttpURLConnection)url.openConnection();
             http.setRequestProperty("Accept", "application/json");

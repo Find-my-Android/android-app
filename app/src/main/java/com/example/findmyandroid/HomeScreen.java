@@ -2,14 +2,15 @@ package com.example.findmyandroid;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import com.google.android.gms.location.LocationListener;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -27,34 +26,22 @@ import androidx.security.crypto.MasterKey;
 
 import com.example.findmyandroid.data.LoginDataSource;
 import com.example.findmyandroid.databinding.FragmentHomeScreenBinding;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import butterknife.ButterKnife;
 
-import android.Manifest;
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -63,30 +50,19 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
-
-
-public class HomeScreen extends Fragment implements OnMapReadyCallback,
-        LocationListener, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class HomeScreen extends Fragment implements OnMapReadyCallback {
 
     private FragmentHomeScreenBinding binding;
-    private SupportMapFragment mapFragment;
 
+    MapView mapView;
+    GoogleMap map;
+    MasterKey masterKeyAlias;
+    private Location mLastLocation;
+    private IntentFilter filter;
+    private Handler mHandler;
 
     public BackgroundService gpsService;
     public boolean mTracking = false;
-
-
-    private GoogleMap mMap;
-    Location mLastLocation;
-    Marker mCurrLocationMarker;
-    GoogleApiClient mGoogleApiClient;
-    LocationRequest mLocationRequest;
-    MasterKey masterKeyAlias;
 
     public HomeScreen() throws GeneralSecurityException, IOException {
     }
@@ -97,7 +73,25 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
             Bundle savedInstanceState
     ) {
 
+        Log.e("Hello", "Start");
         binding = FragmentHomeScreenBinding.inflate(inflater, container, false);
+        // Gets the MapView from the XML layout and creates it
+        mapView = (MapView) binding.mapview;
+        mapView.onCreate(savedInstanceState);
+        mHandler = new Handler();
+
+        Log.e("Hello", "MapCreate");
+        // Gets to GoogleMap from the MapView and does initialization stuff
+        mapView.getMapAsync(this);
+
+        Log.e("Hello", "MapAsync");
+
+        ButterKnife.bind(getActivity());
+        final Intent intent = new Intent(this.getActivity().getApplication(), BackgroundService.class);
+        this.getActivity().getApplication().startService(intent);
+//        this.getApplication().startForegroundService(intent);
+        this.getActivity().getApplication().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        Log.e("Hello", "IntentFinish");
         return binding.getRoot();
 
     }
@@ -105,47 +99,16 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            mapFragment.getMapAsync(this);
-        }
 
-        // R.id.map is a FrameLayout, not a Fragment
-        getChildFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
-        binding.changePassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(HomeScreen.this)
-                        .navigate(R.id.action_homeScreen_to_changePassword);
-            }
-        });
-/*
-        final Intent intent = new Intent(this.getActivity(), BackgroundService.class);
-        getActivity().startService(intent);
-//        this.getApplication().startForegroundService(intent);
-        this.getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);*/
-/*
-        Dexter.withActivity(getActivity())
-                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse response) {
-                        gpsService.startTracking();
-                        mTracking = true;
-                    }
+        startLocationButtonClick();
+//        binding.changePassword.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                NavHostFragment.findNavController(HomeScreen.this)
+//                        .navigate(R.id.action_homeScreen_to_changePassword);
+//            }
+//        });
 
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse response) {
-                        if (response.isPermanentlyDenied()) {
-                            openSettings();
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                }).check();*/
         binding.buttonLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -158,7 +121,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
                 }
                 if (getContext() != null) {
                     try {
-                        masterKeyAlias = new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
+                        masterKeyAlias=new MasterKey.Builder(getContext(), MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
                         SharedPreferences sp = EncryptedSharedPreferences.create(
                                 getContext(),
                                 "secret_shared_prefs",
@@ -185,13 +148,77 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
 
     }
 
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
 
-/*
+    @Override
+    public void onResume() {
+        mapView.onResume();
+        super.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.getUiSettings().setMyLocationButtonEnabled(false);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
+        map.animateCamera(CameraUpdateFactory.zoomTo(11));
+    }
+
+    public void startLocationButtonClick() {
+        Dexter.withActivity(this.getActivity())
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        if(gpsService==null)
+                            Log.e("A", " Nullgps");
+                        gpsService.startTracking();
+                        mTracking = true;
+                    }
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        if (response.isPermanentlyDenied()) {
+                            openSettings();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+    }
+
+
+
     private void openSettings() {
         Intent intent = new Intent();
         intent.setAction( Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -199,135 +226,27 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback,
         intent.setData(uri);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-    }*/
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
 
-        mMap = googleMap;
-        boolean permissionGranted = ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if (permissionGranted) {
-            // {Some Code}
-        } else {
-            Log.e("ASDF", "permission");
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 200);
-
-            Log.e("ASDF", "requerst permission");
-        }
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Log.e("ehlo", "lOPPPPPO");
-            int answer = ContextCompat.checkSelfPermission(getContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION);
-            Log.d("SDFS", String.valueOf(answer));
-            while (ContextCompat.checkSelfPermission(getContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Log.e("ASDF", "in while"+ ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) + PackageManager.PERMISSION_GRANTED);
-            if (ContextCompat.checkSelfPermission(getContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Log.e("ehlo", "lol");
-                buildGoogleApiClient();
-                mMap.setMyLocationEnabled(true);}
-            }
-
-        } else {
-            buildGoogleApiClient();
-            mMap.setMyLocationEnabled(true);
-        }
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        Log.e("ehlo", "assa");
-        mGoogleApiClient = new GoogleApiClient.Builder(this.getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
-        Log.e("ehlo", "asdfsdfsa");
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        Log.e("ehlo", "HLDJSFLJSDLF");
-        mLastLocation = location;
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
-        //Place current location marker
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
-
-        //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-
-        //stop location updates
-        if (mGoogleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (com.google.android.gms.location.LocationListener) this);
-        }
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(1000);
-        Log.e("ehlo", "kok");
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this.getContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-            Log.e("ehlo", "HLDJSFLJSDLF");
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, (com.google.android.gms.location.LocationListener) this);
-        }
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-/*
     private ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             String name = className.getClassName();
+
             if (name.endsWith("BackgroundService")) {
+                Log.e("A","ServiceStart");
                 gpsService = ((BackgroundService.LocationServiceBinder) service).getService();
+                Log.e("A","ServiceFinish");
             }
         }
 
         public void onServiceDisconnected(ComponentName className) {
             if (className.getClassName().equals("BackgroundService")) {
-                gpsService = null;
+                //gpsService = null;
             }
         }
-    };*/
+
+    };
+
 
 }

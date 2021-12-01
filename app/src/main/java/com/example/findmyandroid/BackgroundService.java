@@ -9,22 +9,27 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.util.Log;
 
-import androidx.annotation.RequiresApi;
+import com.example.findmyandroid.data.LocationDataSource;
+import com.example.findmyandroid.data.Result;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class BackgroundService extends Service {
     private final LocationServiceBinder binder = new LocationServiceBinder();
     private final String TAG = "BackgroundService";
-    private LocationListener mLocationListener;
+    private LocationListener1 mLocationListener;
     private LocationManager mLocationManager;
     private NotificationManager notificationManager;
+    private LocationDataSource locationDataSource;
 
     private final int LOCATION_INTERVAL = 500;
     private final int LOCATION_DISTANCE = 10;
@@ -34,13 +39,13 @@ public class BackgroundService extends Service {
         return binder;
     }
 
-    private class LocationListener implements android.location.LocationListener
+    private class LocationListener1 implements android.location.LocationListener
     {
         private Location lastLocation = null;
         private final String TAG = "LocationListener";
         private Location mLastLocation;
 
-        public LocationListener(String provider)
+        public LocationListener1(String provider)
         {
             mLastLocation = new Location(provider);
         }
@@ -48,10 +53,40 @@ public class BackgroundService extends Service {
         @Override
         public void onLocationChanged(Location location)
         {
+        /*    MyAppApplication mApp = ((MyAppApplication)getApplicationContext());
+            //locationDataSource.sendLocation(Double.toString(location.getLatitude()),Double.toString(location.getLongitude()), mApp.getSoftware_id(), mApp.getToken());
+            Log.e("A",""+mApp.getSoftware_id());
+            Log.e("A", mApp.getToken());
             mLastLocation = location;
-            Log.i(TAG, "LocationChanged: "+location);
-        }
+            Log.e(TAG, "LocationChanged: "+location);
 
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            try {
+                //
+                URL url = new URL("https://fmya.duckdns.org:8445/phone/track");
+                HttpURLConnection http = (HttpURLConnection)url.openConnection();
+                http.setRequestMethod("POST");
+                http.setDoOutput(true);
+                http.setRequestProperty("Accept", "application/json");
+                http.setRequestProperty("Content-Type", "application/json");
+                http.setRequestProperty("Authorization", "Bearer " + mApp.getToken());
+                String data = "{\"software_id\": \"" + mApp.getSoftware_id() + "\", \"latitude\": \"" + location.getLatitude() + "\", \"longitude\": \"" + location.getLongitude() + "\"}";
+
+                byte[] out = data.getBytes(StandardCharsets.UTF_8);
+
+                OutputStream stream = http.getOutputStream();
+                stream.write(out);
+                http.disconnect();
+
+            } catch (Exception e) {
+                Log.e("error", e.toString());
+            }
+*/
+        }
+        public Location getLocation() {
+            return mLastLocation;
+        }
         @Override
         public void onProviderDisabled(String provider)
         {
@@ -78,12 +113,15 @@ public class BackgroundService extends Service {
         return START_NOT_STICKY;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate()
     {
         Log.i(TAG, "onCreate");
         startForeground(12345678, getNotification());
+        Intent sendLocation = new Intent();
+        sendLocation.setAction("string");
+        sendLocation.putExtra("Data", "Hello");
+        sendBroadcast(sendLocation);
     }
 
     @Override
@@ -93,6 +131,7 @@ public class BackgroundService extends Service {
         if (mLocationManager != null) {
             try {
                 mLocationManager.removeUpdates(mLocationListener);
+
             } catch (Exception ex) {
                 Log.i(TAG, "fail to remove location listners, ignore", ex);
             }
@@ -101,21 +140,23 @@ public class BackgroundService extends Service {
 
     private void initializeLocationManager() {
         if (mLocationManager == null) {
+            Log.e("A", "IsNull");
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            Log.e("A", "IsNull2");
         }
     }
 
     public void startTracking() {
         initializeLocationManager();
-        mLocationListener = new LocationListener(LocationManager.GPS_PROVIDER);
+        mLocationListener = new LocationListener1(LocationManager.GPS_PROVIDER);
 
         try {
             mLocationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, mLocationListener );
 
         } catch (java.lang.SecurityException ex) {
-            // Log.i(TAG, "fail to request location update, ignore", ex);
+             Log.i(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
-            // Log.d(TAG, "gps provider does not exist " + ex.getMessage());
+             Log.d(TAG, "gps provider does not exist " + ex.getMessage());
         }
 
     }
@@ -124,16 +165,19 @@ public class BackgroundService extends Service {
         this.onDestroy();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private Notification getNotification() {
 
-        NotificationChannel channel = new NotificationChannel("channel_01", "My Channel", NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel channel = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            channel = new NotificationChannel("channel_01", "My Channel", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
 
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
+            Notification.Builder builder = new Notification.Builder(getApplicationContext(), "channel_01").setAutoCancel(true);
+            return builder.build();
+        }
 
-        Notification.Builder builder = new Notification.Builder(getApplicationContext(), "channel_01").setAutoCancel(true);
-        return builder.build();
+        return null;
     }
 
 
