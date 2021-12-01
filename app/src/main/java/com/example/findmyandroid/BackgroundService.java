@@ -14,10 +14,6 @@ import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
 
-import com.example.findmyandroid.data.LocationDataSource;
-import com.example.findmyandroid.data.Result;
-
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -29,7 +25,6 @@ public class BackgroundService extends Service {
     private LocationListener1 mLocationListener;
     private LocationManager mLocationManager;
     private NotificationManager notificationManager;
-    private LocationDataSource locationDataSource;
 
     private final int LOCATION_INTERVAL = 500;
     private final int LOCATION_DISTANCE = 10;
