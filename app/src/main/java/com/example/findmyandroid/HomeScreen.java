@@ -76,7 +76,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         Log.e("Hello", "Start");
         binding = FragmentHomeScreenBinding.inflate(inflater, container, false);
         // Gets the MapView from the XML layout and creates it
-       /* mapView = (MapView) binding.map;
+        mapView = (MapView) binding.mapview;
         mapView.onCreate(savedInstanceState);
         mHandler = new Handler();
 
@@ -85,12 +85,12 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
         Log.e("Hello", "MapAsync");
-*/
+
         ButterKnife.bind(getActivity());
         final Intent intent = new Intent(this.getActivity().getApplication(), BackgroundService.class);
         this.getActivity().getApplication().startService(intent);
 //        this.getApplication().startForegroundService(intent);
-        this.getActivity().getApplication().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        this.getActivity().getApplicationContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
         Log.e("Hello", "IntentFinish");
         return binding.getRoot();
 
@@ -164,7 +164,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+       mapView.onDestroy();
     }
 
     @Override
@@ -199,7 +199,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
                     public void onPermissionGranted(PermissionGrantedResponse response) {
                         if(gpsService==null)
                             Log.e("A", " Nullgps");
-                        gpsService.startTracking();
+                       // gpsService.startTracking();
                         mTracking = true;
                     }
 

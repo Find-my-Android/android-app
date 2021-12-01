@@ -53,7 +53,7 @@ public class BackgroundService extends Service {
         @Override
         public void onLocationChanged(Location location)
         {
-        /*    MyAppApplication mApp = ((MyAppApplication)getApplicationContext());
+           MyAppApplication mApp = ((MyAppApplication)getApplicationContext());
             //locationDataSource.sendLocation(Double.toString(location.getLatitude()),Double.toString(location.getLongitude()), mApp.getSoftware_id(), mApp.getToken());
             Log.e("A",""+mApp.getSoftware_id());
             Log.e("A", mApp.getToken());
@@ -72,7 +72,7 @@ public class BackgroundService extends Service {
                 http.setRequestProperty("Content-Type", "application/json");
                 http.setRequestProperty("Authorization", "Bearer " + mApp.getToken());
                 String data = "{\"software_id\": \"" + mApp.getSoftware_id() + "\", \"latitude\": \"" + location.getLatitude() + "\", \"longitude\": \"" + location.getLongitude() + "\"}";
-
+                Log.e("A", data);
                 byte[] out = data.getBytes(StandardCharsets.UTF_8);
 
                 OutputStream stream = http.getOutputStream();
@@ -82,7 +82,7 @@ public class BackgroundService extends Service {
             } catch (Exception e) {
                 Log.e("error", e.toString());
             }
-*/
+
         }
         public Location getLocation() {
             return mLastLocation;
@@ -122,6 +122,7 @@ public class BackgroundService extends Service {
         sendLocation.setAction("string");
         sendLocation.putExtra("Data", "Hello");
         sendBroadcast(sendLocation);
+        startTracking();
     }
 
     @Override
