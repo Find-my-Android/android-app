@@ -76,7 +76,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         Log.e("Hello", "Start");
         binding = FragmentHomeScreenBinding.inflate(inflater, container, false);
         // Gets the MapView from the XML layout and creates it
-        mapView = (MapView) binding.mapview;
+       /* mapView = (MapView) binding.map;
         mapView.onCreate(savedInstanceState);
         mHandler = new Handler();
 
@@ -85,7 +85,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
         Log.e("Hello", "MapAsync");
-
+*/
         ButterKnife.bind(getActivity());
         final Intent intent = new Intent(this.getActivity().getApplication(), BackgroundService.class);
         this.getActivity().getApplication().startService(intent);
@@ -233,6 +233,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
         public void onServiceConnected(ComponentName className, IBinder service) {
             String name = className.getClassName();
 
+            Log.e("A","ServiceAStart");
             if (name.endsWith("BackgroundService")) {
                 Log.e("A","ServiceStart");
                 gpsService = ((BackgroundService.LocationServiceBinder) service).getService();
