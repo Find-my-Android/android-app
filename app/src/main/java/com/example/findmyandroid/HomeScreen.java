@@ -2,10 +2,16 @@ package com.example.findmyandroid;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.LocationListener;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,19 +26,29 @@ import androidx.security.crypto.MasterKey;
 
 import com.example.findmyandroid.data.LoginDataSource;
 import com.example.findmyandroid.databinding.FragmentHomeScreenBinding;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import butterknife.ButterKnife;
+
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.net.Uri;
+import android.os.IBinder;
+import android.provider.Settings;
+
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 public class HomeScreen extends Fragment implements OnMapReadyCallback {
 
@@ -41,6 +57,13 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     MapView mapView;
     GoogleMap map;
     MasterKey masterKeyAlias;
+    private Location mLastLocation;
+    private IntentFilter filter;
+    private Handler mHandler;
+
+    public BackgroundService gpsService;
+    public boolean mTracking = false;
+
     public HomeScreen() throws GeneralSecurityException, IOException {
     }
 
@@ -50,14 +73,25 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
             Bundle savedInstanceState
     ) {
 
+        Log.e("Hello", "Start");
         binding = FragmentHomeScreenBinding.inflate(inflater, container, false);
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) binding.mapview;
         mapView.onCreate(savedInstanceState);
+        mHandler = new Handler();
 
+        Log.e("Hello", "MapCreate");
         // Gets to GoogleMap from the MapView and does initialization stuff
         mapView.getMapAsync(this);
 
+        Log.e("Hello", "MapAsync");
+
+        ButterKnife.bind(getActivity());
+        final Intent intent = new Intent(this.getActivity().getApplication(), BackgroundService.class);
+        this.getActivity().getApplication().startService(intent);
+//        this.getApplication().startForegroundService(intent);
+        this.getActivity().getApplicationContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        Log.e("Hello", "IntentFinish");
         return binding.getRoot();
 
     }
@@ -66,6 +100,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        startLocationButtonClick();
 //        binding.changePassword.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
@@ -113,6 +148,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
 
     }
 
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -128,7 +164,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+       mapView.onDestroy();
     }
 
     @Override
@@ -152,19 +188,66 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
             return;
         }
         map.setMyLocationEnabled(true);
-       /*
-       //in old Api Needs to call MapsInitializer before doing any CameraUpdateFactory call
-        try {
-            MapsInitializer.initialize(this.getActivity());
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        }
-       */
-
-        // Updates the location and zoom of the MapView
-        /*CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10);
-        map.animateCamera(cameraUpdate);*/
-        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(43.1, -87.9)));
-
+        map.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
+
+    public void startLocationButtonClick() {
+        Dexter.withActivity(this.getActivity())
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        if(gpsService==null)
+                            Log.e("A", " Nullgps");
+                       // gpsService.startTracking();
+                        mTracking = true;
+                    }
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        if (response.isPermanentlyDenied()) {
+                            openSettings();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+    }
+
+
+
+    private void openSettings() {
+        Intent intent = new Intent();
+        intent.setAction( Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+        intent.setData(uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            String name = className.getClassName();
+
+            Log.e("A","ServiceAStart");
+            if (name.endsWith("BackgroundService")) {
+                Log.e("A","ServiceStart");
+                gpsService = ((BackgroundService.LocationServiceBinder) service).getService();
+                Log.e("A","ServiceFinish");
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            if (className.getClassName().equals("BackgroundService")) {
+                //gpsService = null;
+            }
+        }
+
+    };
+
+
 }
