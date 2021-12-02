@@ -3,8 +3,9 @@ package com.example.findmyandroid.data;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.example.findmyandroid.data.model.CreateUser;
 import com.example.findmyandroid.data.model.LoggedInUser;
-
+import java.net.*;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -13,14 +14,69 @@ import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.Scanner;
 import org.json.JSONObject;
-
+import org.json.JSONArray;
 import java.io.IOException;
+import java.lang.Object;
 
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
  */
 public class LoginDataSource {
     LoggedInUser newUser;
+    private String dtoken;
+    String duserID;
+    String dsoftwareID;
+    String ddeviceName;
+    String phoneNumber;
+
+    public void setdToken(String input) {
+        dtoken = input;
+    }
+
+    public String getdToken() {
+        return dtoken;
+    }
+
+    public Result<CreateUser> createUser(String nfirstName, String nlastName, String nemail, String nprimaryPhoneNum, String nsecondaryPhoneNum, String npassword) {
+        String firstName = nfirstName;
+        String lastName = nlastName;
+        String email = nemail;
+        String primaryPhoneNum = nprimaryPhoneNum;
+        String secondaryPhoneNum = nsecondaryPhoneNum;
+        String password = npassword;
+        CreateUser createdUser = new CreateUser(firstName, lastName, email, primaryPhoneNum, secondaryPhoneNum, password);
+        Log.i("info", createdUser.getFirstName() + createdUser.getPassword());
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        try {
+            URL url = new URL("https://fmya.duckdns.org:8445/user/signup");
+            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http.setRequestMethod("POST");
+            http.setDoOutput(true);
+            http.setRequestProperty("Accept", "application/json");
+            http.setRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("charset", "utf-8");
+
+            String data = "{\"first_name\": \"" + createdUser.getFirstName() + "\", \"last_name\": \"" + createdUser.getLastName() + "\", \"email\": \"" + createdUser.getEmail() + "\", \"primary_num\": \"" + createdUser.getPrimaryPhoneNum() + "\", \"secondary_num\": \"" + createdUser.getSecondaryPhoneNum() + "\", \"password\": \"" + createdUser.getPassword() + "\"}";
+
+            byte[] out = data.getBytes(StandardCharsets.UTF_8);
+
+            OutputStream stream = http.getOutputStream();
+            stream.write(out);
+
+            InputStream inStream = http.getInputStream();
+            String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+            Log.i("info", text);
+            http.disconnect();
+
+            return new Result.Success<>(createdUser);
+        } catch (Exception e) {
+            Log.e("error", e.toString());
+            return new Result.Error(new IOException("Error creating new user", e));
+        }
+    }
+
 
     public Result<LoggedInUser> login(String username, String password, String softwareID, String deviceName) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -65,7 +121,6 @@ public class LoginDataSource {
             }
             http.disconnect();
 
-            //
             url = new URL("https://fmya.duckdns.org:8445/user");
             http = (HttpURLConnection)url.openConnection();
             http.setRequestProperty("Accept", "application/json");
@@ -95,24 +150,26 @@ public class LoginDataSource {
             DecimalFormat df3 = new DecimalFormat("000"); // 3 zeros
             DecimalFormat df4 = new DecimalFormat("0000"); // 4 zeros
 
-            String phoneNumber = df3.format(num1) + "-" + df3.format(num2) + "-" + df4.format(num3);
+            phoneNumber = df3.format(num1) + "-" + df3.format(num2) + "-" + df4.format(num3);
 
             Log.i("test",phoneNumber);
             newUser =
                     new LoggedInUser(
                             java.util.UUID.randomUUID().toString(),
                             name, token);
-            //TODO: upload phone details to database: imei, name, phone_num
             url = new URL("https://fmya.duckdns.org:8445/phone/create");
             http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("GET");
             http.setDoOutput(true);
             http.setRequestProperty("Accept", "application/json");
-            http.setRequestProperty("Accept", "application/json");
+            http.setRequestProperty("Content-Type", "application/json");
             http.setRequestProperty("Authorization", "Bearer " + token);
 
-            data = "{\"softare_id\": \"" + softwareID + "\", \"user_id\": \"" + userID + "\", \"name\": \"" + deviceName + "\", \"phone_num\": \"" + phoneNumber + "\"}";
-
+            data = "{\"software_id\": \"" + softwareID + "\", \"user_id\": \"" + userID + "\", \"name\": \"" + deviceName + "\", \"phone_num\": \"" + phoneNumber + "\"}";
+            dsoftwareID = softwareID;
+            ddeviceName = deviceName;
+            setdToken(token);
+            duserID = userID;
             out = data.getBytes(StandardCharsets.UTF_8);
 
             stream = http.getOutputStream();
