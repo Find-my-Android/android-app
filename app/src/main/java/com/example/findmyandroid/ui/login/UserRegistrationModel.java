@@ -23,6 +23,7 @@ public class UserRegistrationModel {
         }
 
         try {
+            number = number.replace("\"", "");
             int num = Integer.parseInt(number.trim());
         } catch (Exception e) {
             return false;
