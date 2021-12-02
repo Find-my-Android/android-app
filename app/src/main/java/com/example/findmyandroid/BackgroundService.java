@@ -14,6 +14,8 @@ import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -54,28 +56,76 @@ public class BackgroundService extends Service {
             mLastLocation = location;
             Log.e(TAG, "LocationChanged: "+location);
 
+
+
+//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//            StrictMode.setThreadPolicy(policy);
+
+            //check if tracking is on
+
+//            try {
+//                //
+//                URL url = new URL("https://fmya.duckdns.org:8445/phone/get/" + mApp.getSoftware_id());
+//                HttpURLConnection http = (HttpURLConnection)url.openConnection();
+//                http.setRequestMethod("GET");
+//                http.setDoOutput(true);
+//                http.setRequestProperty("Accept", "application/json");
+//                http.setRequestProperty("Content-Type", "application/json");
+//                http.setRequestProperty("Authorization", "Bearer " + mApp.getToken());
+//
+//                InputStream inStream = http.getInputStream();
+//                String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+//                Log.i("test", text);
+//                http.disconnect();
+//
+//            } catch (Exception e) {
+//                Log.e("error", e.toString());
+//            }
+            mApp.setToken(binder.locGetToken());
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-            try {
-                //
-                URL url = new URL("https://fmya.duckdns.org:8445/phone/track");
-                HttpURLConnection http = (HttpURLConnection)url.openConnection();
-                http.setRequestMethod("PATCH");
-                http.setDoOutput(true);
-                http.setRequestProperty("Accept", "application/json");
-                http.setRequestProperty("Content-Type", "application/json");
-                http.setRequestProperty("Authorization", "Bearer " + mApp.getToken());
-                String data = "{\"software_id\": \"" + mApp.getSoftware_id() + "\", \"latitude\": \"" + location.getLatitude() + "\", \"longitude\": \"" + location.getLongitude() + "\"}";
-                Log.e("A", data);
-                byte[] out = data.getBytes(StandardCharsets.UTF_8);
 
-                OutputStream stream = http.getOutputStream();
-                stream.write(out);
+            try {
+                URL url = new URL("https://fmya.duckdns.org:8445/phone/get/" + mApp.getSoftware_id().trim());
+                HttpURLConnection http = (HttpURLConnection)url.openConnection();
+                http.setRequestProperty("Accept", "application/json");
+                http.setRequestProperty("Authorization", "Bearer " + mApp.getToken());
 
                 InputStream inStream = http.getInputStream();
                 String text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+                Log.i("test", text);
+                JSONObject json = new JSONObject(text);
+                String objstr = json.get("phone").toString();
+                Log.i("test", objstr);
+                objstr = objstr.replace("[", "");
+                objstr = objstr.replace("]", "");
+                JSONObject phone = new JSONObject(objstr);
+                String getTrackingState = phone.getString("tracking_state").toString();
+                Log.i("test", getTrackingState);
                 http.disconnect();
 
+                int track = Integer.parseInt(getTrackingState);
+
+                if (track == 1) {
+                    // Update tracking if tracking is on
+                    url = new URL("https://fmya.duckdns.org:8445/phone/track");
+                    http = (HttpURLConnection)url.openConnection();
+                    http.setRequestMethod("PATCH");
+                    http.setDoOutput(true);
+                    http.setRequestProperty("Accept", "application/json");
+                    http.setRequestProperty("Content-Type", "application/json");
+                    http.setRequestProperty("Authorization", "Bearer " + mApp.getToken());
+                    String data = "{\"software_id\": \"" + mApp.getSoftware_id() + "\", \"latitude\": \"" + location.getLatitude() + "\", \"longitude\": \"" + location.getLongitude() + "\"}";
+                    Log.e("A", mApp.getToken());
+                    byte[] out = data.getBytes(StandardCharsets.UTF_8);
+
+                    OutputStream stream = http.getOutputStream();
+                    stream.write(out);
+
+                    inStream = http.getInputStream();
+                    text = new Scanner(inStream, "UTF-8").useDelimiter("\\Z").next();
+                    http.disconnect();
+                }
             } catch (Exception e) {
                 Log.e("error", e.toString());
             }
@@ -180,8 +230,18 @@ public class BackgroundService extends Service {
 
 
     public class LocationServiceBinder extends Binder {
-        public BackgroundService getService() {
+        String token;
+        public BackgroundService getService(String input) {
+            token = input;
             return BackgroundService.this;
+        }
+
+        public void setToken(String input) {
+            token = input;
+        }
+
+        public String locGetToken() {
+            return token;
         }
     }
 

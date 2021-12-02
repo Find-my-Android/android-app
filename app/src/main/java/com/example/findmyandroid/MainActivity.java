@@ -3,6 +3,7 @@ package com.example.findmyandroid;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.example.findmyandroid.data.model.LoggedInUser;
 import com.example.findmyandroid.ui.login.LoginFragment;
 
 import androidx.annotation.RequiresApi;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     String android_id;
     String device_name;
+    String token;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
             bundle.putString("deviceName", device_name);
             MyAppApplication mApp = ((MyAppApplication)getApplicationContext());
             mApp.setSoftware_id(android_id);
+            mApp.setToken(token);
+
+            Log.i("info", mApp.getToken().toString());
 
             LoginFragment frag = new LoginFragment();
             frag.setArguments(bundle);
@@ -59,6 +64,13 @@ public class MainActivity extends AppCompatActivity {
     public String getDeviceName() {
         return device_name;
     }
+
+    public void setToken(String input) {
+        token = input;
+    }
+
+    public String getToken() {return token; }
+
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {

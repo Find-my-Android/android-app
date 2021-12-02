@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.findmyandroid.MainActivity;
+import com.example.findmyandroid.data.model.LoggedInUser;
 import com.example.findmyandroid.databinding.FragmentLoginBinding;
 
 import com.example.findmyandroid.R;
@@ -86,8 +87,12 @@ public class LoginFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        if(sp.contains("username")&&sp.contains("password")&&sp.contains("softwareid")&&sp.contains("devicename")){
+        if(sp.contains("username")&&sp.contains("password")&&sp.contains("softwareid")&&sp.contains("devicename")&&sp.contains("token")){
             loginViewModel.login(sp.getString("username",""), sp.getString("password",""),sp.getString("softwareid",""),sp.getString("devicename",""));
+            MainActivity ac = (MainActivity) getActivity();
+            String token = sp.getString("token","");
+            Log.i("info", token);
+            ac.setToken(token);
             NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_login_to_homeScreen);
         }
 
@@ -140,6 +145,7 @@ public class LoginFragment extends Fragment {
                     showLoginFailed(loginResult.getError());
                 }
                 if (loginResult.getSuccess() != null) {
+                    MainActivity ac = (MainActivity) getActivity();
                     updateUiWithUser(loginResult.getSuccess());
                 }
             }
@@ -193,6 +199,8 @@ public class LoginFragment extends Fragment {
 
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
+        MainActivity ac = (MainActivity) getActivity();
+        ac.setToken(model.getAuthToken());
         // TODO : initiate successful logged in experience
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
@@ -202,6 +210,7 @@ public class LoginFragment extends Fragment {
         editor.putString("password",binding.password.getText().toString());
         editor.putString("devicename",deviceName);
         editor.putString("softwareid",softwareID);
+        editor.putString("token",model.getAuthToken());
         editor.commit();
         NavHostFragment.findNavController(LoginFragment.this)
                 .navigate(R.id.action_login_to_homeScreen);

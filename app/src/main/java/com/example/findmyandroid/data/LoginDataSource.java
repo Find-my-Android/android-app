@@ -3,6 +3,7 @@ package com.example.findmyandroid.data;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.example.findmyandroid.MainActivity;
 import com.example.findmyandroid.data.model.CreateUser;
 import com.example.findmyandroid.data.model.LoggedInUser;
 import java.net.*;
@@ -108,6 +109,8 @@ public class LoginDataSource {
 
             String token = "";
             int counter = 0;
+
+
 
             for (int i = 0; i < text.length(); i++) {
                 if (characters[i] == '\"') {

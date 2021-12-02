@@ -26,6 +26,7 @@ import androidx.security.crypto.MasterKey;
 
 import com.example.findmyandroid.data.LoginDataSource;
 import com.example.findmyandroid.databinding.FragmentHomeScreenBinding;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -60,7 +61,6 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     private Location mLastLocation;
     private IntentFilter filter;
     private Handler mHandler;
-
     public BackgroundService gpsService;
     public boolean mTracking = false;
 
@@ -72,6 +72,8 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
+        MainActivity ac = (MainActivity) getActivity();
+        String token = ac.getToken();
 
         Log.e("Hello", "Start");
         binding = FragmentHomeScreenBinding.inflate(inflater, container, false);
@@ -99,7 +101,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        //TODO: Start location tracking
         startLocationButtonClick();
 //        binding.changePassword.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -108,6 +110,8 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
 //                        .navigate(R.id.action_homeScreen_to_changePassword);
 //            }
 //        });
+        MainActivity ac = (MainActivity) getActivity();
+        Log.i("info", ac.getToken());
 
         binding.buttonLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,6 +138,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
                         editor.remove("password");
                         editor.remove("softwareid");
                         editor.remove("devicename");
+                        editor.remove("token");
                         editor.commit();
                     } catch (GeneralSecurityException e) {
                         e.printStackTrace();
@@ -188,7 +193,7 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
             return;
         }
         map.setMyLocationEnabled(true);
-        map.animateCamera(CameraUpdateFactory.zoomTo(11));
+        map.animateCamera(CameraUpdateFactory.zoomTo(1));
     }
 
     public void startLocationButtonClick() {
@@ -236,7 +241,9 @@ public class HomeScreen extends Fragment implements OnMapReadyCallback {
             Log.e("A","ServiceAStart");
             if (name.endsWith("BackgroundService")) {
                 Log.e("A","ServiceStart");
-                gpsService = ((BackgroundService.LocationServiceBinder) service).getService();
+                MainActivity ac = (MainActivity) getActivity();
+                String token = ac.getToken();
+                gpsService = ((BackgroundService.LocationServiceBinder) service).getService(token);
                 Log.e("A","ServiceFinish");
             }
         }
